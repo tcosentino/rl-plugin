@@ -48,4 +48,24 @@ public interface ObjectiveTrackerConfig extends Config
 	{
 		return Color.CYAN;
 	}
+
+	@ConfigItem(
+		keyName = "worldMapIconSize",
+		name = "World Map Icon Size",
+		description = "Size of icons on the world map (in pixels)"
+	)
+	default int worldMapIconSize()
+	{
+		return 24;
+	}
+
+	@ConfigItem(
+		keyName = "minimapIconSize",
+		name = "Minimap Icon Size",
+		description = "Size of icons on the minimap (radius in pixels)"
+	)
+	default int minimapIconSize()
+	{
+		return 8;
+	}
 }

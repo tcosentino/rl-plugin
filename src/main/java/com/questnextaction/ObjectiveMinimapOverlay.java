@@ -76,17 +76,21 @@ public class ObjectiveMinimapOverlay extends Overlay
 	private void renderMinimapMarker(Graphics2D graphics, net.runelite.api.Point point, Objective objective)
 	{
 		Color color = config.highlightColor();
+		int radius = config.minimapIconSize();
+		int diameter = radius * 2;
+		int innerRadius = Math.max(2, radius - 2);
+		int innerDiameter = innerRadius * 2;
 
 		// Draw outer circle
 		graphics.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
-		graphics.fillOval(point.getX() - 6, point.getY() - 6, 12, 12);
+		graphics.fillOval(point.getX() - radius, point.getY() - radius, diameter, diameter);
 
 		// Draw inner circle
 		graphics.setColor(color);
-		graphics.fillOval(point.getX() - 4, point.getY() - 4, 8, 8);
+		graphics.fillOval(point.getX() - innerRadius, point.getY() - innerRadius, innerDiameter, innerDiameter);
 
 		// Draw border
 		graphics.setColor(Color.BLACK);
-		graphics.drawOval(point.getX() - 6, point.getY() - 6, 12, 12);
+		graphics.drawOval(point.getX() - radius, point.getY() - radius, diameter, diameter);
 	}
 }
