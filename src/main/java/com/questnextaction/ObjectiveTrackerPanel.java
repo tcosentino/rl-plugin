@@ -20,6 +20,8 @@ public class ObjectiveTrackerPanel extends PluginPanel
 	private final JPanel objectiveListPanel = new JPanel();
 	private final PluginErrorPanel noObjectivesPanel = new PluginErrorPanel();
 
+	private JFrame parentFrame;
+
 	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
 	{
 		this.objectiveManager = objectiveManager;
@@ -36,6 +38,14 @@ public class ObjectiveTrackerPanel extends PluginPanel
 		title.setForeground(Color.WHITE);
 		title.setFont(new Font("Arial", Font.BOLD, 14));
 		northPanel.add(title, BorderLayout.CENTER);
+
+		// Add objective button
+		JButton addButton = new JButton("+");
+		addButton.setToolTipText("Add new objective");
+		addButton.setPreferredSize(new Dimension(30, 20));
+		addButton.setFont(new Font("Arial", Font.BOLD, 12));
+		addButton.addActionListener(e -> openAddObjectiveDialog());
+		northPanel.add(addButton, BorderLayout.EAST);
 
 		add(northPanel, BorderLayout.NORTH);
 
@@ -56,6 +66,23 @@ public class ObjectiveTrackerPanel extends PluginPanel
 		add(noObjectivesPanel, BorderLayout.SOUTH);
 
 		rebuild();
+	}
+
+	private void openAddObjectiveDialog()
+	{
+		// Get the parent frame if we don't have it yet
+		if (parentFrame == null)
+		{
+			Component component = this;
+			while (component != null && !(component instanceof JFrame))
+			{
+				component = component.getParent();
+			}
+			parentFrame = (JFrame) component;
+		}
+
+		AddObjectiveDialog dialog = new AddObjectiveDialog(parentFrame, objectiveManager, this);
+		dialog.setVisible(true);
 	}
 
 	public void rebuild()
