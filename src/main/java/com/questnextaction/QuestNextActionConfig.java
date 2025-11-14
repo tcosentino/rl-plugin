@@ -6,13 +6,13 @@ import net.runelite.client.config.ConfigItem;
 
 import java.awt.Color;
 
-@ConfigGroup("questnextaction")
-public interface QuestNextActionConfig extends Config
+@ConfigGroup("objectivetracker")
+public interface ObjectiveTrackerConfig extends Config
 {
 	@ConfigItem(
 		keyName = "showWorldMapIcon",
 		name = "Show World Map Icons",
-		description = "Display quest action markers on the world map"
+		description = "Display objective markers on the world map"
 	)
 	default boolean showWorldMapIcon()
 	{
@@ -22,7 +22,7 @@ public interface QuestNextActionConfig extends Config
 	@ConfigItem(
 		keyName = "showMinimapIcon",
 		name = "Show Minimap Icons",
-		description = "Display quest action markers on the minimap"
+		description = "Display objective markers on the minimap"
 	)
 	default boolean showMinimapIcon()
 	{
@@ -32,7 +32,7 @@ public interface QuestNextActionConfig extends Config
 	@ConfigItem(
 		keyName = "showSceneHighlight",
 		name = "Show Scene Highlights",
-		description = "Highlight quest action locations in the game world"
+		description = "Highlight objective locations in the game world"
 	)
 	default boolean showSceneHighlight()
 	{
@@ -42,20 +42,10 @@ public interface QuestNextActionConfig extends Config
 	@ConfigItem(
 		keyName = "highlightColor",
 		name = "Highlight Color",
-		description = "Color for quest action highlights"
+		description = "Color for objective highlights"
 	)
 	default Color highlightColor()
 	{
 		return Color.CYAN;
-	}
-
-	@ConfigItem(
-		keyName = "showHints",
-		name = "Show Hints",
-		description = "Display helpful hints for quest actions"
-	)
-	default boolean showHints()
-	{
-		return true;
 	}
 }

@@ -23,17 +23,17 @@ import java.util.Map;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Quest Next Action",
-	description = "Track the next action needed for each quest and show on map",
-	tags = {"quest", "helper", "map"}
+	name = "Objective Tracker",
+	description = "Track objectives and show them on the map",
+	tags = {"objective", "tracker", "helper", "map"}
 )
-public class QuestNextActionPlugin extends Plugin
+public class ObjectiveTrackerPlugin extends Plugin
 {
 	@Inject
 	private Client client;
 
 	@Inject
-	private QuestNextActionConfig config;
+	private ObjectiveTrackerConfig config;
 
 	@Inject
 	private ClientToolbar clientToolbar;
@@ -45,34 +45,34 @@ public class QuestNextActionPlugin extends Plugin
 	private WorldMapPointManager worldMapPointManager;
 
 	@Inject
-	private QuestActionManager questActionManager;
+	private ObjectiveManager objectiveManager;
 
 	@Inject
-	private QuestActionMinimapOverlay minimapOverlay;
+	private ObjectiveMinimapOverlay minimapOverlay;
 
 	@Inject
-	private QuestActionSceneOverlay sceneOverlay;
+	private ObjectiveSceneOverlay sceneOverlay;
 
-	private QuestNextActionPanel panel;
+	private ObjectiveTrackerPanel panel;
 	private NavigationButton navigationButton;
 
-	private final Map<String, QuestActionWorldMapPoint> worldMapPoints = new HashMap<>();
+	private final Map<String, ObjectiveWorldMapPoint> worldMapPoints = new HashMap<>();
 	private BufferedImage mapIcon;
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Quest Next Action plugin started!");
+		log.info("Objective Tracker plugin started!");
 
 		// Create map icon programmatically
-		mapIcon = createQuestIcon();
+		mapIcon = createObjectiveIcon();
 
 		// Initialize panel
-		panel = new QuestNextActionPanel(questActionManager, config);
+		panel = new ObjectiveTrackerPanel(objectiveManager, config);
 
 		// Create navigation button
 		navigationButton = NavigationButton.builder()
-			.tooltip("Quest Next Action")
+			.tooltip("Objective Tracker")
 			.icon(mapIcon)
 			.priority(5)
 			.panel(panel)
@@ -89,20 +89,20 @@ public class QuestNextActionPlugin extends Plugin
 	}
 
 	/**
-	 * Create a simple quest icon
+	 * Create a simple objective icon
 	 */
-	private BufferedImage createQuestIcon()
+	private BufferedImage createObjectiveIcon()
 	{
 		BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		java.awt.Graphics2D g = image.createGraphics();
 
-		// Draw a cyan circle with a white exclamation mark
+		// Draw a cyan circle with a white checkmark
 		g.setColor(new java.awt.Color(0, 200, 200));
 		g.fillOval(1, 1, 14, 14);
 
 		g.setColor(java.awt.Color.WHITE);
 		g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 12));
-		g.drawString("!", 6, 12);
+		g.drawString("✓", 4, 12);
 
 		g.dispose();
 		return image;
@@ -111,7 +111,7 @@ public class QuestNextActionPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Quest Next Action plugin stopped!");
+		log.info("Objective Tracker plugin stopped!");
 
 		// Remove UI
 		clientToolbar.removeNavigation(navigationButton);
@@ -149,13 +149,13 @@ public class QuestNextActionPlugin extends Plugin
 			return;
 		}
 
-		// Get active actions
-		List<QuestAction> activeActions = questActionManager.getActiveActions();
+		// Get active objectives
+		List<Objective> activeObjectives = objectiveManager.getActiveObjectives();
 
 		// Remove points that are no longer active
 		worldMapPoints.entrySet().removeIf(entry -> {
-			QuestAction action = questActionManager.getAction(entry.getKey());
-			if (action == null || !action.isActive() || action.getLocation() == null)
+			Objective objective = objectiveManager.getObjective(entry.getKey());
+			if (objective == null || !objective.isActive() || objective.getLocation() == null)
 			{
 				worldMapPointManager.remove(entry.getValue());
 				return true;
@@ -164,17 +164,17 @@ public class QuestNextActionPlugin extends Plugin
 		});
 
 		// Add new active points
-		for (QuestAction action : activeActions)
+		for (Objective objective : activeObjectives)
 		{
-			if (action.getLocation() == null)
+			if (objective.getLocation() == null)
 			{
 				continue;
 			}
 
-			if (!worldMapPoints.containsKey(action.getQuestName()))
+			if (!worldMapPoints.containsKey(objective.getId()))
 			{
-				QuestActionWorldMapPoint point = new QuestActionWorldMapPoint(action, mapIcon);
-				worldMapPoints.put(action.getQuestName(), point);
+				ObjectiveWorldMapPoint point = new ObjectiveWorldMapPoint(objective, mapIcon);
+				worldMapPoints.put(objective.getId(), point);
 				worldMapPointManager.add(point);
 			}
 		}
@@ -182,7 +182,7 @@ public class QuestNextActionPlugin extends Plugin
 
 	private void clearWorldMapPoints()
 	{
-		for (QuestActionWorldMapPoint point : worldMapPoints.values())
+		for (ObjectiveWorldMapPoint point : worldMapPoints.values())
 		{
 			worldMapPointManager.remove(point);
 		}
@@ -190,8 +190,8 @@ public class QuestNextActionPlugin extends Plugin
 	}
 
 	@Provides
-	QuestNextActionConfig provideConfig(ConfigManager configManager)
+	ObjectiveTrackerConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(QuestNextActionConfig.class);
+		return configManager.getConfig(ObjectiveTrackerConfig.class);
 	}
 }

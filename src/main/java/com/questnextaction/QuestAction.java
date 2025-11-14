@@ -7,38 +7,37 @@ import net.runelite.api.coords.WorldPoint;
 import javax.annotation.Nullable;
 
 /**
- * Represents the next action needed to progress a quest
+ * Represents a trackable objective
  */
 @Value
 @Builder
-public class QuestAction
+public class Objective
 {
 	/**
-	 * Quest name (e.g., "Cook's Assistant")
+	 * Unique identifier for this objective
 	 */
-	String questName;
+	String id;
 
 	/**
-	 * Type of action required
+	 * Type of objective
 	 */
-	QuestActionType actionType;
+	ObjectiveType type;
 
 	/**
-	 * Description of what needs to be done
+	 * What needs to be done
 	 */
-	String description;
+	String task;
 
 	/**
-	 * World location for this action (null if no specific location)
+	 * Location name (e.g., "Lumbridge Castle", "Varrock Square")
+	 */
+	String locationName;
+
+	/**
+	 * World location for this objective (null if no specific location)
 	 */
 	@Nullable
 	WorldPoint location;
-
-	/**
-	 * Optional additional details or hints
-	 */
-	@Nullable
-	String hint;
 
 	/**
 	 * Region ID for the location (used for map rendering)
@@ -46,7 +45,7 @@ public class QuestAction
 	int regionId;
 
 	/**
-	 * Whether this action is currently active/being tracked
+	 * Whether this objective is currently active/being tracked
 	 */
 	boolean active;
 }

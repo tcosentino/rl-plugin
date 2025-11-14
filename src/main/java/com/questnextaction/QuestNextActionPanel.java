@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class QuestNextActionPanel extends PluginPanel
+public class ObjectiveTrackerPanel extends PluginPanel
 {
-	private final QuestActionManager questActionManager;
-	private final QuestNextActionConfig config;
+	private final ObjectiveManager objectiveManager;
+	private final ObjectiveTrackerConfig config;
 
-	private final JPanel questListPanel = new JPanel();
-	private final PluginErrorPanel noQuestsPanel = new PluginErrorPanel();
+	private final JPanel objectiveListPanel = new JPanel();
+	private final PluginErrorPanel noObjectivesPanel = new PluginErrorPanel();
 
-	public QuestNextActionPanel(QuestActionManager questActionManager, QuestNextActionConfig config)
+	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
 	{
-		this.questActionManager = questActionManager;
+		this.objectiveManager = objectiveManager;
 		this.config = config;
 
 		setLayout(new BorderLayout());
@@ -30,34 +30,30 @@ public class QuestNextActionPanel extends PluginPanel
 
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		northPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		northPanel.setBorder(new EmptyBorder(5, 5, 3, 5));
 
-		JLabel title = new JLabel("Quest Next Actions");
+		JLabel title = new JLabel("Objectives");
 		title.setForeground(Color.WHITE);
-		title.setFont(new Font("Arial", Font.BOLD, 16));
-		northPanel.add(title, BorderLayout.NORTH);
-
-		JLabel subtitle = new JLabel("Click to track/untrack");
-		subtitle.setForeground(Color.LIGHT_GRAY);
-		subtitle.setFont(new Font("Arial", Font.PLAIN, 12));
-		northPanel.add(subtitle, BorderLayout.SOUTH);
+		title.setFont(new Font("Arial", Font.BOLD, 14));
+		northPanel.add(title, BorderLayout.CENTER);
 
 		add(northPanel, BorderLayout.NORTH);
 
-		questListPanel.setLayout(new BoxLayout(questListPanel, BoxLayout.Y_AXIS));
-		questListPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		objectiveListPanel.setLayout(new BoxLayout(objectiveListPanel, BoxLayout.Y_AXIS));
+		objectiveListPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-		JPanel questListWrapper = new JPanel(new BorderLayout());
-		questListWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		questListWrapper.add(questListPanel, BorderLayout.NORTH);
+		JPanel objectiveListWrapper = new JPanel(new BorderLayout());
+		objectiveListWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		objectiveListWrapper.add(objectiveListPanel, BorderLayout.NORTH);
 
-		JScrollPane scrollPane = new JScrollPane(questListWrapper);
+		JScrollPane scrollPane = new JScrollPane(objectiveListWrapper);
 		scrollPane.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setBorder(null);
 		add(scrollPane, BorderLayout.CENTER);
 
-		noQuestsPanel.setContent("No quests available", "Add quest data to get started");
-		add(noQuestsPanel, BorderLayout.SOUTH);
+		noObjectivesPanel.setContent("No objectives", "Add objectives to track");
+		add(noObjectivesPanel, BorderLayout.SOUTH);
 
 		rebuild();
 	}
@@ -66,28 +62,28 @@ public class QuestNextActionPanel extends PluginPanel
 	{
 		SwingUtilities.invokeLater(() ->
 		{
-			questListPanel.removeAll();
+			objectiveListPanel.removeAll();
 
-			List<QuestAction> allActions = new ArrayList<>(questActionManager.getAllActions());
-			allActions.sort((a, b) -> a.getQuestName().compareTo(b.getQuestName()));
+			List<Objective> allObjectives = new ArrayList<>(objectiveManager.getAllObjectives());
+			allObjectives.sort((a, b) -> a.getTask().compareTo(b.getTask()));
 
-			if (allActions.isEmpty())
+			if (allObjectives.isEmpty())
 			{
-				noQuestsPanel.setVisible(true);
+				noObjectivesPanel.setVisible(true);
 			}
 			else
 			{
-				noQuestsPanel.setVisible(false);
+				noObjectivesPanel.setVisible(false);
 
-				for (QuestAction action : allActions)
+				for (Objective objective : allObjectives)
 				{
-					questListPanel.add(new QuestActionBox(action, questActionManager, config, this));
-					questListPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+					objectiveListPanel.add(new ObjectiveListItem(objective, objectiveManager, this));
+					objectiveListPanel.add(Box.createRigidArea(new Dimension(0, 2)));
 				}
 			}
 
-			questListPanel.revalidate();
-			questListPanel.repaint();
+			objectiveListPanel.revalidate();
+			objectiveListPanel.repaint();
 		});
 	}
 }

@@ -1,18 +1,15 @@
 package com.questnextaction;
 
 /**
- * Types of actions that can be required for quest progression
+ * Types of objectives that can be tracked
  */
-public enum QuestActionType
+public enum ObjectiveType
 {
-	TALK_TO_NPC,
-	GO_TO_LOCATION,
-	USE_ITEM,
-	OBTAIN_ITEM,
-	KILL_NPC,
-	USE_OBJECT,
-	EQUIP_ITEM,
-	ENTER_AREA,
-	COMPLETE_PUZZLE,
-	OTHER
+	TALK,      // Talk to an NPC
+	TRAVEL,    // Go to a location
+	COLLECT,   // Obtain or collect items
+	KILL,      // Kill NPCs/monsters
+	USE,       // Use an item or object
+	SKILL,     // Skill training objective
+	OTHER      // General objective
 }

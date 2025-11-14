@@ -10,20 +10,20 @@ import javax.inject.Inject;
 import java.awt.*;
 
 /**
- * Scene overlay for quest action tile markers
+ * Scene overlay for objective tile markers
  */
-public class QuestActionSceneOverlay extends Overlay
+public class ObjectiveSceneOverlay extends Overlay
 {
 	private final Client client;
-	private final QuestActionManager questActionManager;
-	private final QuestNextActionConfig config;
+	private final ObjectiveManager objectiveManager;
+	private final ObjectiveTrackerConfig config;
 
 	@Inject
-	public QuestActionSceneOverlay(Client client, QuestActionManager questActionManager,
-		QuestNextActionConfig config)
+	public ObjectiveSceneOverlay(Client client, ObjectiveManager objectiveManager,
+		ObjectiveTrackerConfig config)
 	{
 		this.client = client;
-		this.questActionManager = questActionManager;
+		this.objectiveManager = objectiveManager;
 		this.config = config;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
@@ -38,22 +38,22 @@ public class QuestActionSceneOverlay extends Overlay
 			return null;
 		}
 
-		for (QuestAction action : questActionManager.getActiveActions())
+		for (Objective objective : objectiveManager.getActiveObjectives())
 		{
-			if (action.getLocation() == null)
+			if (objective.getLocation() == null)
 			{
 				continue;
 			}
 
-			renderTileMarker(graphics, action);
+			renderTileMarker(graphics, objective);
 		}
 
 		return null;
 	}
 
-	private void renderTileMarker(Graphics2D graphics, QuestAction action)
+	private void renderTileMarker(Graphics2D graphics, Objective objective)
 	{
-		WorldPoint worldPoint = action.getLocation();
+		WorldPoint worldPoint = objective.getLocation();
 		LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
 
 		if (localPoint == null)
@@ -80,11 +80,11 @@ public class QuestActionSceneOverlay extends Overlay
 
 		// Draw text above the tile
 		net.runelite.api.Point textPoint = Perspective.getCanvasTextLocation(
-			client, graphics, localPoint, action.getQuestName(), 0);
+			client, graphics, localPoint, objective.getTask(), 0);
 
 		if (textPoint != null)
 		{
-			OverlayUtil.renderTextLocation(graphics, textPoint, action.getQuestName(), color);
+			OverlayUtil.renderTextLocation(graphics, textPoint, objective.getTask(), color);
 		}
 	}
 }

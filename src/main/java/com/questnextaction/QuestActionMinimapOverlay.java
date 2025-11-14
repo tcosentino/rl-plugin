@@ -10,20 +10,20 @@ import javax.inject.Inject;
 import java.awt.*;
 
 /**
- * Minimap overlay for quest action markers
+ * Minimap overlay for objective markers
  */
-public class QuestActionMinimapOverlay extends Overlay
+public class ObjectiveMinimapOverlay extends Overlay
 {
 	private final Client client;
-	private final QuestActionManager questActionManager;
-	private final QuestNextActionConfig config;
+	private final ObjectiveManager objectiveManager;
+	private final ObjectiveTrackerConfig config;
 
 	@Inject
-	public QuestActionMinimapOverlay(Client client, QuestActionManager questActionManager,
-		QuestNextActionConfig config)
+	public ObjectiveMinimapOverlay(Client client, ObjectiveManager objectiveManager,
+		ObjectiveTrackerConfig config)
 	{
 		this.client = client;
-		this.questActionManager = questActionManager;
+		this.objectiveManager = objectiveManager;
 		this.config = config;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -40,22 +40,22 @@ public class QuestActionMinimapOverlay extends Overlay
 
 		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 
-		for (QuestAction action : questActionManager.getActiveActions())
+		for (Objective objective : objectiveManager.getActiveObjectives())
 		{
-			if (action.getLocation() == null)
+			if (objective.getLocation() == null)
 			{
 				continue;
 			}
 
-			WorldPoint actionLocation = action.getLocation();
+			WorldPoint objectiveLocation = objective.getLocation();
 
 			// Only show if in same plane
-			if (actionLocation.getPlane() != playerLocation.getPlane())
+			if (objectiveLocation.getPlane() != playerLocation.getPlane())
 			{
 				continue;
 			}
 
-			LocalPoint localPoint = LocalPoint.fromWorld(client, actionLocation);
+			LocalPoint localPoint = LocalPoint.fromWorld(client, objectiveLocation);
 			if (localPoint == null)
 			{
 				continue;
@@ -67,13 +67,13 @@ public class QuestActionMinimapOverlay extends Overlay
 				continue;
 			}
 
-			renderMinimapMarker(graphics, minimapPoint, action);
+			renderMinimapMarker(graphics, minimapPoint, objective);
 		}
 
 		return null;
 	}
 
-	private void renderMinimapMarker(Graphics2D graphics, net.runelite.api.Point point, QuestAction action)
+	private void renderMinimapMarker(Graphics2D graphics, net.runelite.api.Point point, Objective objective)
 	{
 		Color color = config.highlightColor();
 

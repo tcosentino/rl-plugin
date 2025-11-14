@@ -9,22 +9,22 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
- * World map marker for quest actions
+ * World map marker for objectives
  */
-public class QuestActionWorldMapPoint extends WorldMapPoint
+public class ObjectiveWorldMapPoint extends WorldMapPoint
 {
-	private final QuestAction questAction;
+	private final Objective objective;
 	private final BufferedImage mapIcon;
 
-	public QuestActionWorldMapPoint(QuestAction questAction, BufferedImage mapIcon)
+	public ObjectiveWorldMapPoint(Objective objective, BufferedImage mapIcon)
 	{
-		super(questAction.getLocation(), mapIcon);
-		this.questAction = questAction;
+		super(objective.getLocation(), mapIcon);
+		this.objective = objective;
 		this.mapIcon = mapIcon;
 		this.setSnapToEdge(true);
 		this.setJumpOnClick(true);
 		this.setTooltip(buildTooltip());
-		this.setName(questAction.getQuestName());
+		this.setName(objective.getTask());
 	}
 
 	@Override
@@ -42,21 +42,15 @@ public class QuestActionWorldMapPoint extends WorldMapPoint
 	private String buildTooltip()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(questAction.getQuestName());
+		sb.append(objective.getTask());
 		sb.append("</br>");
-		sb.append(questAction.getDescription());
-
-		if (questAction.getHint() != null && !questAction.getHint().isEmpty())
-		{
-			sb.append("</br>");
-			sb.append("<i>").append(questAction.getHint()).append("</i>");
-		}
+		sb.append(objective.getLocationName());
 
 		return sb.toString();
 	}
 
-	public QuestAction getQuestAction()
+	public Objective getObjective()
 	{
-		return questAction;
+		return objective;
 	}
 }

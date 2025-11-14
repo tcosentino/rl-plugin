@@ -7,78 +7,64 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * UI component representing a single quest action in the panel
+ * Compact UI component for a single objective item
  */
-public class QuestActionBox extends JPanel
+public class ObjectiveListItem extends JPanel
 {
-	private static final Color ACTIVE_COLOR = new Color(50, 150, 50);
+	private static final Color ACTIVE_COLOR = new Color(40, 120, 40);
 	private static final Color INACTIVE_COLOR = ColorScheme.DARKER_GRAY_COLOR;
+	private static final Color HOVER_COLOR = new Color(60, 60, 60);
 
-	private final QuestAction action;
-	private final QuestActionManager manager;
-	private final QuestNextActionConfig config;
-	private final QuestNextActionPanel parentPanel;
+	private final Objective objective;
+	private final ObjectiveManager manager;
+	private final ObjectiveTrackerPanel parentPanel;
 
-	public QuestActionBox(QuestAction action, QuestActionManager manager,
-		QuestNextActionConfig config, QuestNextActionPanel parentPanel)
+	public ObjectiveListItem(Objective objective, ObjectiveManager manager,
+		ObjectiveTrackerPanel parentPanel)
 	{
-		this.action = action;
+		this.objective = objective;
 		this.manager = manager;
-		this.config = config;
 		this.parentPanel = parentPanel;
 
 		setLayout(new BorderLayout());
-		setBackground(action.isActive() ? ACTIVE_COLOR : INACTIVE_COLOR);
-		setBorder(new EmptyBorder(10, 10, 10, 10));
+		setBackground(objective.isActive() ? ACTIVE_COLOR : INACTIVE_COLOR);
+		setBorder(new EmptyBorder(4, 6, 4, 6));
 
-		// Quest name
-		JLabel questNameLabel = new JLabel(action.getQuestName());
-		questNameLabel.setForeground(Color.WHITE);
-		questNameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+		// Type badge (small, colored square with initial)
+		JLabel typeBadge = new JLabel(getTypeBadge(objective.getType()));
+		typeBadge.setForeground(getTypeColor(objective.getType()));
+		typeBadge.setFont(new Font("Arial", Font.BOLD, 10));
+		typeBadge.setBorder(new EmptyBorder(0, 0, 0, 4));
 
-		// Action type badge
-		JLabel typeLabel = new JLabel(formatActionType(action.getActionType()));
-		typeLabel.setForeground(Color.YELLOW);
-		typeLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+		// Main content panel (task + location)
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+		contentPanel.setOpaque(false);
 
-		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.setOpaque(false);
-		topPanel.add(questNameLabel, BorderLayout.NORTH);
-		topPanel.add(typeLabel, BorderLayout.SOUTH);
+		// Task label
+		JLabel taskLabel = new JLabel(objective.getTask());
+		taskLabel.setForeground(Color.WHITE);
+		taskLabel.setFont(new Font("Arial", Font.BOLD, 11));
+		taskLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		// Action description
-		JTextArea descriptionArea = new JTextArea(action.getDescription());
-		descriptionArea.setForeground(Color.LIGHT_GRAY);
-		descriptionArea.setBackground(new Color(0, 0, 0, 0));
-		descriptionArea.setFont(new Font("Arial", Font.PLAIN, 12));
-		descriptionArea.setLineWrap(true);
-		descriptionArea.setWrapStyleWord(true);
-		descriptionArea.setEditable(false);
-		descriptionArea.setFocusable(false);
+		// Location label
+		JLabel locationLabel = new JLabel(objective.getLocationName());
+		locationLabel.setForeground(Color.LIGHT_GRAY);
+		locationLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+		locationLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		JPanel centerPanel = new JPanel(new BorderLayout());
-		centerPanel.setOpaque(false);
-		centerPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
-		centerPanel.add(descriptionArea, BorderLayout.NORTH);
+		contentPanel.add(taskLabel);
+		contentPanel.add(locationLabel);
 
-		// Hint (if enabled and available)
-		if (config.showHints() && action.getHint() != null && !action.getHint().isEmpty())
-		{
-			JLabel hintLabel = new JLabel("Hint: " + action.getHint());
-			hintLabel.setForeground(new Color(200, 200, 150));
-			hintLabel.setFont(new Font("Arial", Font.ITALIC, 11));
-			centerPanel.add(hintLabel, BorderLayout.SOUTH);
-		}
+		// Status indicator (small dot)
+		JLabel statusDot = new JLabel(objective.isActive() ? "●" : "○");
+		statusDot.setForeground(objective.isActive() ? Color.GREEN : Color.GRAY);
+		statusDot.setFont(new Font("Arial", Font.PLAIN, 12));
+		statusDot.setBorder(new EmptyBorder(0, 4, 0, 0));
 
-		// Status label
-		JLabel statusLabel = new JLabel(action.isActive() ? "TRACKING" : "Click to track");
-		statusLabel.setForeground(action.isActive() ? Color.GREEN : Color.GRAY);
-		statusLabel.setFont(new Font("Arial", Font.BOLD, 11));
-		statusLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-
-		add(topPanel, BorderLayout.NORTH);
-		add(centerPanel, BorderLayout.CENTER);
-		add(statusLabel, BorderLayout.SOUTH);
+		add(typeBadge, BorderLayout.WEST);
+		add(contentPanel, BorderLayout.CENTER);
+		add(statusDot, BorderLayout.EAST);
 
 		// Click to toggle tracking
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -87,51 +73,66 @@ public class QuestActionBox extends JPanel
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent e)
 			{
-				manager.toggleQuest(action.getQuestName());
+				manager.toggleObjective(objective.getId());
 				parentPanel.rebuild();
 			}
 
 			@Override
 			public void mouseEntered(java.awt.event.MouseEvent e)
 			{
-				setBorder(BorderFactory.createCompoundBorder(
-					BorderFactory.createLineBorder(Color.WHITE, 1),
-					new EmptyBorder(9, 9, 9, 9)
-				));
+				if (!objective.isActive())
+				{
+					setBackground(HOVER_COLOR);
+				}
 			}
 
 			@Override
 			public void mouseExited(java.awt.event.MouseEvent e)
 			{
-				setBorder(new EmptyBorder(10, 10, 10, 10));
+				setBackground(objective.isActive() ? ACTIVE_COLOR : INACTIVE_COLOR);
 			}
 		});
 	}
 
-	private String formatActionType(QuestActionType type)
+	private String getTypeBadge(ObjectiveType type)
 	{
 		switch (type)
 		{
-			case TALK_TO_NPC:
-				return "Talk to NPC";
-			case GO_TO_LOCATION:
-				return "Go to Location";
-			case USE_ITEM:
-				return "Use Item";
-			case OBTAIN_ITEM:
-				return "Obtain Item";
-			case KILL_NPC:
-				return "Kill NPC";
-			case USE_OBJECT:
-				return "Use Object";
-			case EQUIP_ITEM:
-				return "Equip Item";
-			case ENTER_AREA:
-				return "Enter Area";
-			case COMPLETE_PUZZLE:
-				return "Complete Puzzle";
+			case TALK:
+				return "[T]";
+			case TRAVEL:
+				return "[→]";
+			case COLLECT:
+				return "[C]";
+			case KILL:
+				return "[K]";
+			case USE:
+				return "[U]";
+			case SKILL:
+				return "[S]";
 			default:
-				return "Quest Action";
+				return "[·]";
+		}
+	}
+
+	private Color getTypeColor(ObjectiveType type)
+	{
+		switch (type)
+		{
+			case TALK:
+				return new Color(100, 200, 255);  // Light blue
+			case TRAVEL:
+				return new Color(255, 200, 100);  // Orange
+			case COLLECT:
+				return new Color(255, 255, 100);  // Yellow
+			case KILL:
+				return new Color(255, 100, 100);  // Red
+			case USE:
+				return new Color(200, 100, 255);  // Purple
+			case SKILL:
+				return new Color(100, 255, 150);  // Green
+			default:
+				return Color.LIGHT_GRAY;
 		}
 	}
 }
