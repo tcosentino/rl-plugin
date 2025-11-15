@@ -1,5 +1,6 @@
 package com.questnextaction;
 
+import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
@@ -20,8 +21,10 @@ public class ObjectiveWorldMapOverlay extends WorldMapOverlay
 	private BufferedImage mapIcon;
 
 	@Inject
-	public ObjectiveWorldMapOverlay(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
+	public ObjectiveWorldMapOverlay(Client client, WorldMapPointManager worldMapPointManager,
+	                                 ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
 	{
+		super(client, worldMapPointManager);
 		this.objectiveManager = objectiveManager;
 		this.config = config;
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
