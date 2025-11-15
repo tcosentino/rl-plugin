@@ -1,5 +1,6 @@
 package com.questnextaction;
 
+import com.questnextaction.db.ShopDatabase;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -16,16 +17,19 @@ public class ObjectiveTrackerPanel extends PluginPanel
 {
 	private final ObjectiveManager objectiveManager;
 	private final ObjectiveTrackerConfig config;
+	private final ShopDatabase shopDatabase;
 
 	private final JPanel objectiveListPanel = new JPanel();
 	private final PluginErrorPanel noObjectivesPanel = new PluginErrorPanel();
 
 	private JFrame parentFrame;
 
-	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
+	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config,
+		ShopDatabase shopDatabase)
 	{
 		this.objectiveManager = objectiveManager;
 		this.config = config;
+		this.shopDatabase = shopDatabase;
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -81,7 +85,7 @@ public class ObjectiveTrackerPanel extends PluginPanel
 			parentFrame = (JFrame) component;
 		}
 
-		AddObjectiveDialog dialog = new AddObjectiveDialog(parentFrame, objectiveManager, this);
+		AddObjectiveDialog dialog = new AddObjectiveDialog(parentFrame, objectiveManager, this, shopDatabase);
 		dialog.setVisible(true);
 	}
 

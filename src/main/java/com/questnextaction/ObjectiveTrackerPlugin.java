@@ -1,6 +1,7 @@
 package com.questnextaction;
 
 import com.google.inject.Provides;
+import com.questnextaction.db.ShopDatabase;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameStateChanged;
@@ -48,6 +49,9 @@ public class ObjectiveTrackerPlugin extends Plugin
 	private ObjectiveManager objectiveManager;
 
 	@Inject
+	private ShopDatabase shopDatabase;
+
+	@Inject
 	private ObjectiveMinimapOverlay minimapOverlay;
 
 	@Inject
@@ -68,7 +72,7 @@ public class ObjectiveTrackerPlugin extends Plugin
 		mapIcon = createObjectiveIcon();
 
 		// Initialize panel
-		panel = new ObjectiveTrackerPanel(objectiveManager, config);
+		panel = new ObjectiveTrackerPanel(objectiveManager, config, shopDatabase);
 
 		// Create navigation button
 		navigationButton = NavigationButton.builder()

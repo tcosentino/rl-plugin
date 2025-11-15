@@ -1,13 +1,20 @@
 package com.questnextaction;
 
+import com.questnextaction.db.Shop;
+import com.questnextaction.db.ShopDatabase;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Dialog for adding new objectives
@@ -17,20 +24,24 @@ public class AddObjectiveDialog extends JDialog
 {
 	private final ObjectiveManager objectiveManager;
 	private final ObjectiveTrackerPanel parentPanel;
+	private final ShopDatabase shopDatabase;
 
 	// Form fields
-	private final JTextField itemNameField;
-	private final JTextField shopNameField;
+	private final JComboBox<String> itemComboBox;
+	private final JComboBox<String> shopComboBox;
 	private final JTextField xCoordField;
 	private final JTextField yCoordField;
 	private final JTextField planeField;
 
+	private boolean updatingFields = false;
+
 	public AddObjectiveDialog(JFrame parent, ObjectiveManager objectiveManager,
-		ObjectiveTrackerPanel parentPanel)
+		ObjectiveTrackerPanel parentPanel, ShopDatabase shopDatabase)
 	{
 		super(parent, "Add Shop Purchase Objective", true);
 		this.objectiveManager = objectiveManager;
 		this.parentPanel = parentPanel;
+		this.shopDatabase = shopDatabase;
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -45,7 +56,7 @@ public class AddObjectiveDialog extends JDialog
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.insets = new Insets(5, 5, 5, 5);
 
-		// Item name
+		// Item name autocomplete
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		JLabel itemLabel = new JLabel("Item to buy:");
@@ -54,10 +65,41 @@ public class AddObjectiveDialog extends JDialog
 
 		gbc.gridx = 1;
 		gbc.weightx = 1.0;
-		itemNameField = new JTextField(20);
-		formPanel.add(itemNameField, gbc);
+		itemComboBox = new JComboBox<>();
+		itemComboBox.setEditable(true);
+		itemComboBox.setMaximumRowCount(10);
+		populateItemComboBox("");
+		itemComboBox.addItemListener(e -> {
+			if (e.getStateChange() == ItemEvent.SELECTED && !updatingFields)
+			{
+				onItemSelected();
+			}
+		});
+		// Add autocomplete listener to item text field
+		JTextField itemEditor = (JTextField) itemComboBox.getEditor().getEditorComponent();
+		itemEditor.getDocument().addDocumentListener(new DocumentListener()
+		{
+			@Override
+			public void insertUpdate(DocumentEvent e)
+			{
+				updateItemSuggestions();
+			}
 
-		// Shop name
+			@Override
+			public void removeUpdate(DocumentEvent e)
+			{
+				updateItemSuggestions();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e)
+			{
+				updateItemSuggestions();
+			}
+		});
+		formPanel.add(itemComboBox, gbc);
+
+		// Shop name dropdown
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.weightx = 0;
@@ -67,8 +109,14 @@ public class AddObjectiveDialog extends JDialog
 
 		gbc.gridx = 1;
 		gbc.weightx = 1.0;
-		shopNameField = new JTextField(20);
-		formPanel.add(shopNameField, gbc);
+		shopComboBox = new JComboBox<>();
+		shopComboBox.addItemListener(e -> {
+			if (e.getStateChange() == ItemEvent.SELECTED && !updatingFields)
+			{
+				onShopSelected();
+			}
+		});
+		formPanel.add(shopComboBox, gbc);
 
 		// Location section
 		gbc.gridx = 0;
@@ -142,10 +190,107 @@ public class AddObjectiveDialog extends JDialog
 		setLocationRelativeTo(parent);
 	}
 
+	private void populateItemComboBox(String filter)
+	{
+		updatingFields = true;
+		itemComboBox.removeAllItems();
+
+		List<String> items;
+		if (filter == null || filter.trim().isEmpty())
+		{
+			items = shopDatabase.getAllItemNames();
+		}
+		else
+		{
+			items = shopDatabase.searchItems(filter);
+		}
+
+		// Limit to first 50 for performance
+		items.stream().limit(50).forEach(itemComboBox::addItem);
+		updatingFields = false;
+	}
+
+	private void updateItemSuggestions()
+	{
+		if (updatingFields)
+		{
+			return;
+		}
+
+		JTextField editor = (JTextField) itemComboBox.getEditor().getEditorComponent();
+		String text = editor.getText();
+
+		SwingUtilities.invokeLater(() -> {
+			populateItemComboBox(text);
+			itemComboBox.setPopupVisible(true);
+			editor.setText(text);
+		});
+	}
+
+	private void onItemSelected()
+	{
+		Object selected = itemComboBox.getSelectedItem();
+		if (selected == null)
+		{
+			return;
+		}
+
+		String itemName = selected.toString().trim();
+		List<Shop> shops = shopDatabase.findShopsByItem(itemName);
+
+		updatingFields = true;
+		shopComboBox.removeAllItems();
+
+		if (shops.isEmpty())
+		{
+			// Add all shops as fallback
+			shopDatabase.getAllShops().forEach(shop ->
+				shopComboBox.addItem(shop.getName()));
+		}
+		else
+		{
+			shops.forEach(shop -> shopComboBox.addItem(shop.getName()));
+		}
+
+		updatingFields = false;
+
+		// Auto-select first shop if available
+		if (shopComboBox.getItemCount() > 0)
+		{
+			shopComboBox.setSelectedIndex(0);
+		}
+	}
+
+	private void onShopSelected()
+	{
+		Object selected = shopComboBox.getSelectedItem();
+		if (selected == null)
+		{
+			return;
+		}
+
+		String shopName = selected.toString();
+		Shop shop = shopDatabase.getAllShops().stream()
+			.filter(s -> s.getName().equals(shopName))
+			.findFirst()
+			.orElse(null);
+
+		if (shop != null && shop.getWorldPoint() != null)
+		{
+			WorldPoint point = shop.getWorldPoint();
+			xCoordField.setText(String.valueOf(point.getX()));
+			yCoordField.setText(String.valueOf(point.getY()));
+			planeField.setText(String.valueOf(point.getPlane()));
+		}
+	}
+
 	private void addObjective()
 	{
-		String itemName = itemNameField.getText().trim();
-		String shopName = shopNameField.getText().trim();
+		Object itemObj = itemComboBox.getSelectedItem();
+		Object shopObj = shopComboBox.getSelectedItem();
+
+		String itemName = itemObj != null ? itemObj.toString().trim() : "";
+		String shopName = shopObj != null ? shopObj.toString().trim() : "";
 
 		if (itemName.isEmpty())
 		{

@@ -1,0 +1,170 @@
+[
+  {
+    "id": "lumbridge_general_store",
+    "name": "Lumbridge General Store",
+    "owner": "Shop keeper",
+    "location": "Lumbridge",
+    "x": 3212,
+    "y": 3247,
+    "plane": 0,
+    "items": [
+      {"itemId": 1931, "name": "Pot", "stock": 5, "price": 1},
+      {"itemId": 1925, "name": "Bucket", "stock": 2, "price": 2},
+      {"itemId": 590, "name": "Tinderbox", "stock": 2, "price": 1},
+      {"itemId": 1755, "name": "Chisel", "stock": 2, "price": 1},
+      {"itemId": 1735, "name": "Shears", "stock": 2, "price": 1},
+      {"itemId": 946, "name": "Knife", "stock": 5, "price": 6},
+      {"itemId": 1923, "name": "Bowl", "stock": 2, "price": 4},
+      {"itemId": 1887, "name": "Cake tin", "stock": 2, "price": 10}
+    ]
+  },
+  {
+    "id": "varrock_general_store",
+    "name": "Varrock General Store",
+    "owner": "Shop keeper",
+    "location": "Varrock",
+    "x": 3217,
+    "y": 3412,
+    "plane": 0,
+    "items": [
+      {"itemId": 1931, "name": "Pot", "stock": 5, "price": 1},
+      {"itemId": 1925, "name": "Bucket", "stock": 2, "price": 2},
+      {"itemId": 590, "name": "Tinderbox", "stock": 2, "price": 1},
+      {"itemId": 1755, "name": "Chisel", "stock": 2, "price": 1},
+      {"itemId": 1735, "name": "Shears", "stock": 2, "price": 1},
+      {"itemId": 946, "name": "Knife", "stock": 5, "price": 6},
+      {"itemId": 1923, "name": "Bowl", "stock": 2, "price": 4},
+      {"itemId": 1887, "name": "Cake tin", "stock": 2, "price": 10},
+      {"itemId": 2347, "name": "Hammer", "stock": 5, "price": 1}
+    ]
+  },
+  {
+    "id": "varrock_rune_shop",
+    "name": "Aubury's Rune Shop",
+    "owner": "Aubury",
+    "location": "Varrock",
+    "x": 3253,
+    "y": 3401,
+    "plane": 0,
+    "items": [
+      {"itemId": 556, "name": "Air rune", "stock": 300, "price": 5},
+      {"itemId": 558, "name": "Mind rune", "stock": 300, "price": 5},
+      {"itemId": 555, "name": "Water rune", "stock": 300, "price": 5},
+      {"itemId": 557, "name": "Earth rune", "stock": 300, "price": 5},
+      {"itemId": 559, "name": "Fire rune", "stock": 300, "price": 5},
+      {"itemId": 564, "name": "Cosmic rune", "stock": 10, "price": 150},
+      {"itemId": 562, "name": "Chaos rune", "stock": 10, "price": 100},
+      {"itemId": 561, "name": "Nature rune", "stock": 10, "price": 250}
+    ]
+  },
+  {
+    "id": "port_sarim_rune_shop",
+    "name": "Betty's Magic Emporium",
+    "owner": "Betty",
+    "location": "Port Sarim",
+    "x": 3013,
+    "y": 3258,
+    "plane": 0,
+    "items": [
+      {"itemId": 556, "name": "Air rune", "stock": 300, "price": 5},
+      {"itemId": 558, "name": "Mind rune", "stock": 300, "price": 5},
+      {"itemId": 555, "name": "Water rune", "stock": 300, "price": 5},
+      {"itemId": 557, "name": "Earth rune", "stock": 300, "price": 5},
+      {"itemId": 559, "name": "Fire rune", "stock": 300, "price": 5}
+    ]
+  },
+  {
+    "id": "varrock_staff_shop",
+    "name": "Zaff's Superior Staffs",
+    "owner": "Zaff",
+    "location": "Varrock",
+    "x": 3202,
+    "y": 3434,
+    "plane": 0,
+    "items": [
+      {"itemId": 1381, "name": "Staff", "stock": 10, "price": 15},
+      {"itemId": 1383, "name": "Staff of air", "stock": 10, "price": 1500},
+      {"itemId": 1385, "name": "Staff of water", "stock": 10, "price": 1500},
+      {"itemId": 1387, "name": "Staff of earth", "stock": 10, "price": 1500},
+      {"itemId": 1389, "name": "Staff of fire", "stock": 10, "price": 1500}
+    ]
+  },
+  {
+    "id": "varrock_sword_shop",
+    "name": "Varrock Sword Shop",
+    "owner": "Shopkeeper",
+    "location": "Varrock",
+    "x": 3167,
+    "y": 3418,
+    "plane": 0,
+    "items": [
+      {"itemId": 1277, "name": "Bronze sword", "stock": 3, "price": 26},
+      {"itemId": 1279, "name": "Iron sword", "stock": 2, "price": 104},
+      {"itemId": 1323, "name": "Steel sword", "stock": 2, "price": 520},
+      {"itemId": 1375, "name": "Black sword", "stock": 1, "price": 1920},
+      {"itemId": 1289, "name": "Mithril sword", "stock": 1, "price": 1300},
+      {"itemId": 1291, "name": "Adamant sword", "stock": 1, "price": 3120}
+    ]
+  },
+  {
+    "id": "lumbridge_combat_shop",
+    "name": "Lumbridge Combat Shop",
+    "owner": "Shop keeper",
+    "location": "Lumbridge",
+    "x": 3229,
+    "y": 3207,
+    "plane": 0,
+    "items": [
+      {"itemId": 1277, "name": "Bronze sword", "stock": 3, "price": 26},
+      {"itemId": 1139, "name": "Bronze platebody", "stock": 2, "price": 160},
+      {"itemId": 1075, "name": "Bronze helm", "stock": 3, "price": 32},
+      {"itemId": 1171, "name": "Bronze kiteshield", "stock": 2, "price": 68},
+      {"itemId": 1117, "name": "Bronze platelegs", "stock": 2, "price": 80},
+      {"itemId": 841, "name": "Shortbow", "stock": 5, "price": 40},
+      {"itemId": 882, "name": "Bronze arrow", "stock": 200, "price": 2}
+    ]
+  },
+  {
+    "id": "falador_general_store",
+    "name": "Falador General Store",
+    "owner": "Shop keeper",
+    "location": "Falador",
+    "x": 2955,
+    "y": 3390,
+    "plane": 0,
+    "items": [
+      {"itemId": 1931, "name": "Pot", "stock": 5, "price": 1},
+      {"itemId": 1925, "name": "Bucket", "stock": 2, "price": 2},
+      {"itemId": 590, "name": "Tinderbox", "stock": 2, "price": 1},
+      {"itemId": 1755, "name": "Chisel", "stock": 2, "price": 1},
+      {"itemId": 1735, "name": "Shears", "stock": 2, "price": 1},
+      {"itemId": 946, "name": "Knife", "stock": 5, "price": 6},
+      {"itemId": 1923, "name": "Bowl", "stock": 2, "price": 4},
+      {"itemId": 2347, "name": "Hammer", "stock": 5, "price": 1}
+    ]
+  },
+  {
+    "id": "ardougne_bakers_stall",
+    "name": "Ardougne Baker's Stall",
+    "owner": "Baker",
+    "location": "Ardougne",
+    "x": 2667,
+    "y": 3310,
+    "plane": 0,
+    "items": [
+      {"itemId": 2309, "name": "Bread", "stock": 10, "price": 12},
+      {"itemId": 1891, "name": "Cake", "stock": 10, "price": 50},
+      {"itemId": 1901, "name": "Chocolate bar", "stock": 10, "price": 30}
+    ]
+  },
+  {
+    "id": "grand_exchange",
+    "name": "Grand Exchange",
+    "owner": "Grand Exchange Clerk",
+    "location": "Varrock",
+    "x": 3164,
+    "y": 3487,
+    "plane": 0,
+    "items": []
+  }
+]
