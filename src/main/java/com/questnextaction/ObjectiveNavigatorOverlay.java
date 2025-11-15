@@ -185,7 +185,7 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 
 		// Get camera rotation and adjust arrow angle
 		double cameraAngle = getCameraAngleDegrees();
-		double relativeAngle = currentAngle - cameraAngle;
+		double relativeAngle = currentAngle - cameraAngle + 180;
 
 		// Translate to arrow position and rotate
 		graphics.translate(arrowX, arrowY);
