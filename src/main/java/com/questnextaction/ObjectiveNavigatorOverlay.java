@@ -21,6 +21,8 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 	private final ObjectiveTrackerConfig config;
 	private final ObjectiveManager objectiveManager;
 
+	private double currentAngle = 0;
+
 	@Inject
 	private ObjectiveNavigatorOverlay(Client client, ObjectiveTrackerConfig config, ObjectiveManager objectiveManager)
 	{
@@ -30,6 +32,7 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 
 		setPosition(OverlayPosition.TOP_CENTER);
 		setPriority(OverlayPriority.HIGH);
+		panelComponent.setPreferredSize(new Dimension(250, 0));
 	}
 
 	@Override
@@ -111,14 +114,23 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 			.build());
 
 		// Direction
-		String direction = calculateDirection(playerLocation, closestObjective.getLocation());
+		currentAngle = calculateAngle(playerLocation, closestObjective.getLocation());
+		String cardinal = getCardinalDirection(currentAngle);
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Direction:")
-			.right(direction)
+			.right(cardinal)
 			.rightColor(config.highlightColor())
 			.build());
 
-		return super.render(graphics);
+		Dimension panelDimension = super.render(graphics);
+
+		// Draw directional arrow
+		if (panelDimension != null)
+		{
+			drawDirectionalArrow(graphics, panelDimension);
+		}
+
+		return panelDimension;
 	}
 
 	/**
@@ -132,9 +144,10 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 	}
 
 	/**
-	 * Calculate the cardinal direction and compass bearing from one point to another
+	 * Calculate the angle in degrees from one point to another
+	 * 0° = North, 90° = East, 180° = South, 270° = West
 	 */
-	private String calculateDirection(WorldPoint from, WorldPoint to)
+	private double calculateAngle(WorldPoint from, WorldPoint to)
 	{
 		int deltaX = to.getX() - from.getX();
 		int deltaY = to.getY() - from.getY();
@@ -149,10 +162,40 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 			angleDegrees += 360;
 		}
 
-		// Get cardinal direction
-		String cardinal = getCardinalDirection(angleDegrees);
+		return angleDegrees;
+	}
 
-		return String.format("%s (%.0f°)", cardinal, angleDegrees);
+	/**
+	 * Draw a directional arrow pointing towards the objective
+	 */
+	private void drawDirectionalArrow(Graphics2D graphics, Dimension panelDimension)
+	{
+		// Save original transform
+		java.awt.geom.AffineTransform originalTransform = graphics.getTransform();
+
+		// Calculate arrow position (centered below the panel)
+		int arrowX = panelDimension.width / 2;
+		int arrowY = panelDimension.height + 25;
+
+		// Create arrow shape (pointing up by default, will be rotated)
+		int arrowSize = 20;
+		int[] xPoints = {0, -arrowSize / 3, arrowSize / 3};
+		int[] yPoints = {-arrowSize / 2, arrowSize / 2, arrowSize / 2};
+		Polygon arrow = new Polygon(xPoints, yPoints, 3);
+
+		// Translate to arrow position and rotate
+		graphics.translate(arrowX, arrowY);
+		graphics.rotate(Math.toRadians(currentAngle));
+
+		// Draw arrow with outline
+		graphics.setColor(config.highlightColor());
+		graphics.fillPolygon(arrow);
+		graphics.setColor(Color.BLACK);
+		graphics.setStroke(new BasicStroke(2));
+		graphics.drawPolygon(arrow);
+
+		// Restore original transform
+		graphics.setTransform(originalTransform);
 	}
 
 	/**
