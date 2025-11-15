@@ -2,9 +2,10 @@ package com.questnextaction;
 
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.InterfaceID;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.*;
-import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
-import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 
 import javax.inject.Inject;
@@ -14,8 +15,10 @@ import java.awt.image.BufferedImage;
 /**
  * Custom world map overlay to render objective icons on top of everything
  */
-public class ObjectiveWorldMapOverlay extends WorldMapOverlay
+public class ObjectiveWorldMapOverlay extends Overlay
 {
+	private final Client client;
+	private final WorldMapPointManager worldMapPointManager;
 	private final ObjectiveManager objectiveManager;
 	private final ObjectiveTrackerConfig config;
 	private BufferedImage mapIcon;
@@ -24,9 +27,11 @@ public class ObjectiveWorldMapOverlay extends WorldMapOverlay
 	public ObjectiveWorldMapOverlay(Client client, WorldMapPointManager worldMapPointManager,
 	                                 ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
 	{
-		super(client, worldMapPointManager);
+		this.client = client;
+		this.worldMapPointManager = worldMapPointManager;
 		this.objectiveManager = objectiveManager;
 		this.config = config;
+		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(OverlayPriority.HIGH);
 	}
@@ -44,6 +49,13 @@ public class ObjectiveWorldMapOverlay extends WorldMapOverlay
 			return null;
 		}
 
+		// Check if world map is open
+		Widget worldMapWidget = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW);
+		if (worldMapWidget == null || worldMapWidget.isHidden())
+		{
+			return null;
+		}
+
 		for (Objective objective : objectiveManager.getActiveObjectives())
 		{
 			if (objective.getLocation() == null)
@@ -51,7 +63,7 @@ public class ObjectiveWorldMapOverlay extends WorldMapOverlay
 				continue;
 			}
 
-			Point point = mapWorldPointToGraphicsPoint(objective.getLocation());
+			Point point = worldMapPointManager.mapWorldPointToGraphicsPoint(objective.getLocation());
 			if (point == null)
 			{
 				continue;
