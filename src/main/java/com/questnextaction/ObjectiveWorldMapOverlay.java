@@ -2,10 +2,11 @@ package com.questnextaction;
 
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.ComponentID;
-import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.*;
+import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 
 import javax.inject.Inject;
@@ -63,7 +64,8 @@ public class ObjectiveWorldMapOverlay extends Overlay
 				continue;
 			}
 
-			Point point = worldMapPointManager.mapWorldPointToGraphicsPoint(objective.getLocation());
+			// Get screen point using world map point manager's surface
+			Point point = getWorldMapPoint(objective.getLocation());
 			if (point == null)
 			{
 				continue;
@@ -77,5 +79,48 @@ public class ObjectiveWorldMapOverlay extends Overlay
 		}
 
 		return null;
+	}
+
+	/**
+	 * Convert a world point to screen coordinates on the world map
+	 */
+	private Point getWorldMapPoint(WorldPoint worldPoint)
+	{
+		// Use the world map point manager to convert coordinates
+		float zoom = client.getRenderOverview().getWorldMapZoom();
+		final WorldPoint mapPoint = new WorldPoint(
+			worldPoint.getX(),
+			worldPoint.getY(),
+			0
+		);
+
+		// Get the map position
+		final net.runelite.api.RenderOverview renderOverview = client.getRenderOverview();
+		if (renderOverview == null)
+		{
+			return null;
+		}
+
+		final float pixelsPerTile = zoom / 4.0f;
+		final Widget widget = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW);
+		if (widget == null)
+		{
+			return null;
+		}
+
+		final Rectangle bounds = widget.getBounds();
+		final int widthInTiles = (int) Math.ceil(bounds.getWidth() / pixelsPerTile);
+		final int heightInTiles = (int) Math.ceil(bounds.getHeight() / pixelsPerTile);
+
+		final Point worldMapPosition = renderOverview.getWorldMapPosition();
+
+		final int yTileMax = worldMapPosition.getY() - heightInTiles / 2;
+		final int yTileOffset = (yTileMax - worldPoint.getY() - 1) * -1;
+		final int xTileOffset = worldPoint.getX() + widthInTiles / 2 - worldMapPosition.getX();
+
+		final int xPos = bounds.x + (int) (xTileOffset * pixelsPerTile);
+		final int yPos = bounds.y + (int) (yTileOffset * pixelsPerTile);
+
+		return new Point(xPos, yPos);
 	}
 }
