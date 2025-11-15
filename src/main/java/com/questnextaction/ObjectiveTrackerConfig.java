@@ -40,6 +40,16 @@ public interface ObjectiveTrackerConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showNavigator",
+		name = "Show Navigator Overlay",
+		description = "Display a navigator widget showing distance and direction to the closest objective"
+	)
+	default boolean showNavigator()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "highlightColor",
 		name = "Highlight Color",
 		description = "Color for objective highlights"
