@@ -183,9 +183,13 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 		int[] yPoints = {-arrowSize / 2, arrowSize / 2, arrowSize / 2};
 		Polygon arrow = new Polygon(xPoints, yPoints, 3);
 
+		// Get camera rotation and adjust arrow angle
+		double cameraAngle = getCameraAngleDegrees();
+		double relativeAngle = currentAngle - cameraAngle;
+
 		// Translate to arrow position and rotate
 		graphics.translate(arrowX, arrowY);
-		graphics.rotate(Math.toRadians(currentAngle));
+		graphics.rotate(Math.toRadians(relativeAngle));
 
 		// Draw arrow with outline
 		graphics.setColor(config.highlightColor());
@@ -196,6 +200,25 @@ public class ObjectiveNavigatorOverlay extends OverlayPanel
 
 		// Restore original transform
 		graphics.setTransform(originalTransform);
+	}
+
+	/**
+	 * Get the camera angle in degrees
+	 * Camera yaw is in JAU (Jagex Angle Units) where 2048 = 360 degrees
+	 * 0 JAU = South, 512 = West, 1024 = North, 1536 = East
+	 */
+	private double getCameraAngleDegrees()
+	{
+		int cameraYaw = client.getCameraYaw();
+		// Convert JAU to degrees: (yaw / 2048) * 360
+		double degrees = (cameraYaw / 2048.0) * 360.0;
+
+		// Adjust for coordinate system
+		// JAU 0 = South, but we want 0 = North
+		// So we need to rotate by 180 degrees and flip
+		degrees = (degrees + 180) % 360;
+
+		return degrees;
 	}
 
 	/**
