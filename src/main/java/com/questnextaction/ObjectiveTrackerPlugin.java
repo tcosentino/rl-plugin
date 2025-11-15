@@ -53,6 +53,9 @@ public class ObjectiveTrackerPlugin extends Plugin
 	@Inject
 	private ObjectiveSceneOverlay sceneOverlay;
 
+	@Inject
+	private ObjectiveWorldMapOverlay worldMapOverlay;
+
 	private ObjectiveTrackerPanel panel;
 	private NavigationButton navigationButton;
 
@@ -83,8 +86,12 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Add overlays
 		overlayManager.add(minimapOverlay);
 		overlayManager.add(sceneOverlay);
+		overlayManager.add(worldMapOverlay);
 
-		// Initialize world map points
+		// Set the map icon on the world map overlay
+		worldMapOverlay.setMapIcon(mapIcon);
+
+		// Initialize world map points (keeping for fallback)
 		updateWorldMapPoints();
 	}
 
@@ -128,6 +135,7 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Remove overlays
 		overlayManager.remove(minimapOverlay);
 		overlayManager.remove(sceneOverlay);
+		overlayManager.remove(worldMapOverlay);
 
 		// Clear world map points
 		clearWorldMapPoints();
