@@ -53,6 +53,9 @@ public class ObjectiveTrackerPlugin extends Plugin
 	@Inject
 	private ObjectiveSceneOverlay sceneOverlay;
 
+	@Inject
+	private ObjectiveWorldMapOverlay worldMapOverlay;
+
 	private ObjectiveTrackerPanel panel;
 	private NavigationButton navigationButton;
 
@@ -83,8 +86,12 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Add overlays
 		overlayManager.add(minimapOverlay);
 		overlayManager.add(sceneOverlay);
+		overlayManager.add(worldMapOverlay);
 
-		// Initialize world map points
+		// Set the map icon on the world map overlay
+		worldMapOverlay.setMapIcon(mapIcon);
+
+		// Initialize world map points (keeping for fallback)
 		updateWorldMapPoints();
 	}
 
@@ -93,16 +100,25 @@ public class ObjectiveTrackerPlugin extends Plugin
 	 */
 	private BufferedImage createObjectiveIcon()
 	{
-		BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		int size = config.worldMapIconSize();
+		BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 		java.awt.Graphics2D g = image.createGraphics();
+		g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 
 		// Draw a cyan circle with a white checkmark
 		g.setColor(new java.awt.Color(0, 200, 200));
-		g.fillOval(1, 1, 14, 14);
+		g.fillOval(1, 1, size - 2, size - 2);
 
 		g.setColor(java.awt.Color.WHITE);
-		g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 12));
-		g.drawString("✓", 4, 12);
+		int fontSize = Math.max(10, (int)(size * 0.75));
+		g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, fontSize));
+
+		// Center the checkmark
+		java.awt.FontMetrics fm = g.getFontMetrics();
+		String checkmark = "✓";
+		int x = (size - fm.stringWidth(checkmark)) / 2;
+		int y = ((size - fm.getHeight()) / 2) + fm.getAscent();
+		g.drawString(checkmark, x, y);
 
 		g.dispose();
 		return image;
@@ -119,6 +135,7 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Remove overlays
 		overlayManager.remove(minimapOverlay);
 		overlayManager.remove(sceneOverlay);
+		overlayManager.remove(worldMapOverlay);
 
 		// Clear world map points
 		clearWorldMapPoints();

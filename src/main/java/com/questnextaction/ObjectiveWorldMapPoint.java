@@ -25,6 +25,11 @@ public class ObjectiveWorldMapPoint extends WorldMapPoint
 		this.setJumpOnClick(true);
 		this.setTooltip(buildTooltip());
 		this.setName(objective.getTask());
+
+		// Set a high render layer so objectives appear above other map icons
+		this.setImagePoint(null); // Use default rendering
+		this.setClickbox(new java.awt.Rectangle(-mapIcon.getWidth() / 2, -mapIcon.getHeight() / 2,
+			mapIcon.getWidth(), mapIcon.getHeight()));
 	}
 
 	@Override
