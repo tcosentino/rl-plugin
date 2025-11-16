@@ -28,10 +28,8 @@ public class AddObjectiveDialog extends JDialog
 
 	// Form fields
 	private final JComboBox<String> itemComboBox;
-	private final JComboBox<String> shopComboBox;
-	private final JTextField xCoordField;
-	private final JTextField yCoordField;
-	private final JTextField planeField;
+	private final JSpinner quantitySpinner;
+	private final JLabel shopsLabel;
 
 	private boolean updatingFields = false;
 
@@ -99,74 +97,29 @@ public class AddObjectiveDialog extends JDialog
 		});
 		formPanel.add(itemComboBox, gbc);
 
-		// Shop name dropdown
+		// Quantity spinner
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.weightx = 0;
-		JLabel shopLabel = new JLabel("Shop name:");
-		shopLabel.setForeground(Color.WHITE);
-		formPanel.add(shopLabel, gbc);
+		JLabel quantityLabel = new JLabel("Quantity:");
+		quantityLabel.setForeground(Color.WHITE);
+		formPanel.add(quantityLabel, gbc);
 
 		gbc.gridx = 1;
 		gbc.weightx = 1.0;
-		shopComboBox = new JComboBox<>();
-		shopComboBox.addItemListener(e -> {
-			if (e.getStateChange() == ItemEvent.SELECTED && !updatingFields)
-			{
-				onShopSelected();
-			}
-		});
-		formPanel.add(shopComboBox, gbc);
+		SpinnerNumberModel spinnerModel = new SpinnerNumberModel(1, 1, 10000, 1);
+		quantitySpinner = new JSpinner(spinnerModel);
+		formPanel.add(quantitySpinner, gbc);
 
-		// Location section
+		// Available shops label (shows where item can be bought)
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
-		JLabel locationLabel = new JLabel("Shop Location (optional):");
-		locationLabel.setForeground(Color.WHITE);
-		locationLabel.setFont(locationLabel.getFont().deriveFont(Font.BOLD));
-		formPanel.add(locationLabel, gbc);
-
-		// X coordinate
-		gbc.gridx = 0;
-		gbc.gridy = 3;
-		gbc.gridwidth = 1;
-		gbc.weightx = 0;
-		JLabel xLabel = new JLabel("X:");
-		xLabel.setForeground(Color.WHITE);
-		formPanel.add(xLabel, gbc);
-
-		gbc.gridx = 1;
 		gbc.weightx = 1.0;
-		xCoordField = new JTextField(10);
-		formPanel.add(xCoordField, gbc);
-
-		// Y coordinate
-		gbc.gridx = 0;
-		gbc.gridy = 4;
-		gbc.weightx = 0;
-		JLabel yLabel = new JLabel("Y:");
-		yLabel.setForeground(Color.WHITE);
-		formPanel.add(yLabel, gbc);
-
-		gbc.gridx = 1;
-		gbc.weightx = 1.0;
-		yCoordField = new JTextField(10);
-		formPanel.add(yCoordField, gbc);
-
-		// Plane
-		gbc.gridx = 0;
-		gbc.gridy = 5;
-		gbc.weightx = 0;
-		JLabel planeLabel = new JLabel("Plane:");
-		planeLabel.setForeground(Color.WHITE);
-		formPanel.add(planeLabel, gbc);
-
-		gbc.gridx = 1;
-		gbc.weightx = 1.0;
-		planeField = new JTextField(10);
-		planeField.setText("0");
-		formPanel.add(planeField, gbc);
+		shopsLabel = new JLabel(" ");
+		shopsLabel.setForeground(Color.LIGHT_GRAY);
+		shopsLabel.setFont(shopsLabel.getFont().deriveFont(Font.ITALIC, 10f));
+		formPanel.add(shopsLabel, gbc);
 
 		add(formPanel, BorderLayout.CENTER);
 
@@ -232,65 +185,40 @@ public class AddObjectiveDialog extends JDialog
 		Object selected = itemComboBox.getSelectedItem();
 		if (selected == null)
 		{
+			shopsLabel.setText(" ");
 			return;
 		}
 
 		String itemName = selected.toString().trim();
 		List<Shop> shops = shopDatabase.findShopsByItem(itemName);
 
-		updatingFields = true;
-		shopComboBox.removeAllItems();
-
+		// Update the label to show available shops
 		if (shops.isEmpty())
 		{
-			// Add all shops as fallback
-			shopDatabase.getAllShops().forEach(shop ->
-				shopComboBox.addItem(shop.getName()));
+			shopsLabel.setText("⚠ Item not found in shop database");
+		}
+		else if (shops.size() == 1)
+		{
+			shopsLabel.setText("Available at: " + shops.get(0).getName());
 		}
 		else
 		{
-			shops.forEach(shop -> shopComboBox.addItem(shop.getName()));
-		}
-
-		updatingFields = false;
-
-		// Auto-select first shop if available
-		if (shopComboBox.getItemCount() > 0)
-		{
-			shopComboBox.setSelectedIndex(0);
-		}
-	}
-
-	private void onShopSelected()
-	{
-		Object selected = shopComboBox.getSelectedItem();
-		if (selected == null)
-		{
-			return;
-		}
-
-		String shopName = selected.toString();
-		Shop shop = shopDatabase.getAllShops().stream()
-			.filter(s -> s.getName().equals(shopName))
-			.findFirst()
-			.orElse(null);
-
-		if (shop != null && shop.getWorldPoint() != null)
-		{
-			WorldPoint point = shop.getWorldPoint();
-			xCoordField.setText(String.valueOf(point.getX()));
-			yCoordField.setText(String.valueOf(point.getY()));
-			planeField.setText(String.valueOf(point.getPlane()));
+			String shopNames = shops.stream()
+				.map(Shop::getName)
+				.limit(3)
+				.collect(Collectors.joining(", "));
+			if (shops.size() > 3)
+			{
+				shopNames += ", and " + (shops.size() - 3) + " more";
+			}
+			shopsLabel.setText("Available at " + shops.size() + " shops: " + shopNames);
 		}
 	}
 
 	private void addObjective()
 	{
 		Object itemObj = itemComboBox.getSelectedItem();
-		Object shopObj = shopComboBox.getSelectedItem();
-
 		String itemName = itemObj != null ? itemObj.toString().trim() : "";
-		String shopName = shopObj != null ? shopObj.toString().trim() : "";
 
 		if (itemName.isEmpty())
 		{
@@ -301,47 +229,74 @@ public class AddObjectiveDialog extends JDialog
 			return;
 		}
 
-		if (shopName.isEmpty())
-		{
-			JOptionPane.showMessageDialog(this,
-				"Please enter a shop name",
-				"Validation Error",
-				JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+		int quantity = (Integer) quantitySpinner.getValue();
 
-		// Parse coordinates if provided
-		WorldPoint location = null;
-		try
-		{
-			String xText = xCoordField.getText().trim();
-			String yText = yCoordField.getText().trim();
-			String planeText = planeField.getText().trim();
+		// Find all shops selling this item
+		List<Shop> shops = shopDatabase.findShopsByItem(itemName);
 
-			if (!xText.isEmpty() && !yText.isEmpty() && !planeText.isEmpty())
+		if (shops.isEmpty())
+		{
+			int result = JOptionPane.showConfirmDialog(this,
+				"This item is not in the shop database.\nCreate objective anyway?",
+				"Item Not Found",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE);
+
+			if (result != JOptionPane.YES_OPTION)
 			{
-				int x = Integer.parseInt(xText);
-				int y = Integer.parseInt(yText);
-				int plane = Integer.parseInt(planeText);
-				location = new WorldPoint(x, y, plane);
+				return;
 			}
 		}
-		catch (NumberFormatException ex)
+
+		// Create the objective with all shop locations
+		String id = "buy_" + UUID.randomUUID().toString().substring(0, 8);
+		String task = quantity > 1 ? "Buy " + quantity + "x " + itemName : "Buy " + itemName;
+
+		// Build location info
+		String locationName;
+		WorldPoint primaryLocation = null;
+
+		if (shops.isEmpty())
 		{
-			JOptionPane.showMessageDialog(this,
-				"Invalid coordinates. Please enter valid numbers.",
-				"Validation Error",
-				JOptionPane.ERROR_MESSAGE);
-			return;
+			locationName = "Unknown";
+		}
+		else if (shops.size() == 1)
+		{
+			locationName = shops.get(0).getName();
+			primaryLocation = shops.get(0).getWorldPoint();
+		}
+		else
+		{
+			locationName = shops.size() + " shops";
+			primaryLocation = shops.get(0).getWorldPoint(); // Use first as fallback
 		}
 
-		// Create the objective
-		String id = "buy_" + UUID.randomUUID().toString().substring(0, 8);
-		String task = "Buy " + itemName;
+		// Build the objective with multiple locations
+		Objective.ObjectiveBuilder builder = Objective.builder()
+			.id(id)
+			.type(ObjectiveType.BUY)
+			.task(task)
+			.locationName(locationName)
+			.location(primaryLocation)
+			.regionId(primaryLocation != null ? primaryLocation.getRegionID() : 0)
+			.active(false)
+			.itemName(itemName)
+			.quantity(quantity);
 
-		objectiveManager.addObjective(id, ObjectiveType.BUY, task, shopName, location);
+		// Add all shop locations as possible locations
+		for (Shop shop : shops)
+		{
+			if (shop.getWorldPoint() != null)
+			{
+				builder.possibleLocation(shop.getWorldPoint());
+			}
+		}
 
-		log.debug("Added new objective: {} at {}", task, shopName);
+		Objective objective = builder.build();
+		objectiveManager.addObjective(objective);
+
+		log.debug("Added new objective: {} at {} (with {} possible locations)",
+			task, locationName, shops.size());
 
 		// Refresh the panel
 		parentPanel.rebuild();

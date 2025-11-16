@@ -55,7 +55,7 @@ public class ObjectiveManager
 		Objective existing = objectives.get(id);
 		if (existing != null)
 		{
-			Objective updated = Objective.builder()
+			Objective.ObjectiveBuilder builder = Objective.builder()
 				.id(existing.getId())
 				.type(existing.getType())
 				.task(existing.getTask())
@@ -63,8 +63,19 @@ public class ObjectiveManager
 				.location(existing.getLocation())
 				.regionId(existing.getRegionId())
 				.active(!existing.isActive())
-				.build();
-			objectives.put(id, updated);
+				.itemName(existing.getItemName())
+				.quantity(existing.getQuantity());
+
+			// Copy possible locations
+			if (existing.getPossibleLocations() != null)
+			{
+				for (WorldPoint loc : existing.getPossibleLocations())
+				{
+					builder.possibleLocation(loc);
+				}
+			}
+
+			objectives.put(id, builder.build());
 		}
 	}
 
@@ -87,6 +98,14 @@ public class ObjectiveManager
 			.build();
 
 		objectives.put(id, objective);
+	}
+
+	/**
+	 * Add a new objective (direct)
+	 */
+	public void addObjective(Objective objective)
+	{
+		objectives.put(objective.getId(), objective);
 	}
 
 	/**

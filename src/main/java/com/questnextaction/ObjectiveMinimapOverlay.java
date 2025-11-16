@@ -42,12 +42,14 @@ public class ObjectiveMinimapOverlay extends Overlay
 
 		for (Objective objective : objectiveManager.getActiveObjectives())
 		{
-			if (objective.getLocation() == null)
+			// Get the best location based on player's position
+			// For multi-location objectives, this returns the closest shop
+			WorldPoint objectiveLocation = objective.getBestLocation(playerLocation);
+
+			if (objectiveLocation == null)
 			{
 				continue;
 			}
-
-			WorldPoint objectiveLocation = objective.getLocation();
 
 			// Only show if in same plane
 			if (objectiveLocation.getPlane() != playerLocation.getPlane())

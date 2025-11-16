@@ -38,22 +38,27 @@ public class ObjectiveSceneOverlay extends Overlay
 			return null;
 		}
 
+		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
+
 		for (Objective objective : objectiveManager.getActiveObjectives())
 		{
-			if (objective.getLocation() == null)
+			// Get the best location based on player's position
+			// For multi-location objectives, this returns the closest shop
+			WorldPoint objectiveLocation = objective.getBestLocation(playerLocation);
+
+			if (objectiveLocation == null)
 			{
 				continue;
 			}
 
-			renderTileMarker(graphics, objective);
+			renderTileMarker(graphics, objective, objectiveLocation);
 		}
 
 		return null;
 	}
 
-	private void renderTileMarker(Graphics2D graphics, Objective objective)
+	private void renderTileMarker(Graphics2D graphics, Objective objective, WorldPoint worldPoint)
 	{
-		WorldPoint worldPoint = objective.getLocation();
 		LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
 
 		if (localPoint == null)
