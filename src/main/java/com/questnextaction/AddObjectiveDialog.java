@@ -32,6 +32,7 @@ public class AddObjectiveDialog extends JDialog
 	private final JLabel shopsLabel;
 
 	private boolean updatingFields = false;
+	private String lastSearchText = "";
 
 	public AddObjectiveDialog(JFrame parent, ObjectiveManager objectiveManager,
 		ObjectiveTrackerPanel parentPanel, ShopDatabase shopDatabase)
@@ -173,10 +174,32 @@ public class AddObjectiveDialog extends JDialog
 		JTextField editor = (JTextField) itemComboBox.getEditor().getEditorComponent();
 		String text = editor.getText();
 
+		// Only update if text actually changed
+		if (text.equals(lastSearchText))
+		{
+			return;
+		}
+
+		lastSearchText = text;
+		int caretPosition = editor.getCaretPosition();
+
 		SwingUtilities.invokeLater(() -> {
+			updatingFields = true;
 			populateItemComboBox(text);
-			itemComboBox.setPopupVisible(true);
+
+			// Only show popup if we have a non-empty search
+			if (!text.isEmpty())
+			{
+				itemComboBox.setPopupVisible(true);
+			}
+
+			// Restore the text and caret position
 			editor.setText(text);
+			if (caretPosition <= text.length())
+			{
+				editor.setCaretPosition(caretPosition);
+			}
+			updatingFields = false;
 		});
 	}
 
