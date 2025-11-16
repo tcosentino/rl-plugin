@@ -59,3 +59,10 @@ tasks.register('shadowJar', Jar) {
 	archiveClassifier.set('shadow')
 	archiveFileName.set("${rootProject.name}-${project.version}-all.jar")
 }
+
+tasks.register('runTestHarness', JavaExec) {
+	description = 'Run the Objective Tracker test harness UI'
+	group = 'application'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.questnextaction.testharness.TestHarnessRunner'
+}
