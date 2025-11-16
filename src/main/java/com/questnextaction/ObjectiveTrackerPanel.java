@@ -1,5 +1,6 @@
 package com.questnextaction;
 
+import com.questnextaction.db.ShopDatabase;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -16,14 +17,19 @@ public class ObjectiveTrackerPanel extends PluginPanel
 {
 	private final ObjectiveManager objectiveManager;
 	private final ObjectiveTrackerConfig config;
+	private final ShopDatabase shopDatabase;
 
 	private final JPanel objectiveListPanel = new JPanel();
 	private final PluginErrorPanel noObjectivesPanel = new PluginErrorPanel();
 
-	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config)
+	private JFrame parentFrame;
+
+	public ObjectiveTrackerPanel(ObjectiveManager objectiveManager, ObjectiveTrackerConfig config,
+		ShopDatabase shopDatabase)
 	{
 		this.objectiveManager = objectiveManager;
 		this.config = config;
+		this.shopDatabase = shopDatabase;
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -36,6 +42,14 @@ public class ObjectiveTrackerPanel extends PluginPanel
 		title.setForeground(Color.WHITE);
 		title.setFont(new Font("Arial", Font.BOLD, 14));
 		northPanel.add(title, BorderLayout.CENTER);
+
+		// Add objective button
+		JButton addButton = new JButton("+");
+		addButton.setToolTipText("Add new objective");
+		addButton.setPreferredSize(new Dimension(30, 20));
+		addButton.setFont(new Font("Arial", Font.BOLD, 12));
+		addButton.addActionListener(e -> openAddObjectiveDialog());
+		northPanel.add(addButton, BorderLayout.EAST);
 
 		add(northPanel, BorderLayout.NORTH);
 
@@ -56,6 +70,23 @@ public class ObjectiveTrackerPanel extends PluginPanel
 		add(noObjectivesPanel, BorderLayout.SOUTH);
 
 		rebuild();
+	}
+
+	private void openAddObjectiveDialog()
+	{
+		// Get the parent frame if we don't have it yet
+		if (parentFrame == null)
+		{
+			Component component = this;
+			while (component != null && !(component instanceof JFrame))
+			{
+				component = component.getParent();
+			}
+			parentFrame = (JFrame) component;
+		}
+
+		AddObjectiveDialog dialog = new AddObjectiveDialog(parentFrame, objectiveManager, this, shopDatabase);
+		dialog.setVisible(true);
 	}
 
 	public void rebuild()

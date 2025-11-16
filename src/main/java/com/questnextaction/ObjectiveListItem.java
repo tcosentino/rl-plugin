@@ -110,6 +110,8 @@ public class ObjectiveListItem extends JPanel
 				return "[U]";
 			case SKILL:
 				return "[S]";
+			case BUY:
+				return "[B]";
 			default:
 				return "[·]";
 		}
@@ -131,6 +133,8 @@ public class ObjectiveListItem extends JPanel
 				return new Color(200, 100, 255);  // Purple
 			case SKILL:
 				return new Color(100, 255, 150);  // Green
+			case BUY:
+				return new Color(255, 215, 0);    // Gold
 			default:
 				return Color.LIGHT_GRAY;
 		}

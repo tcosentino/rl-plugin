@@ -11,5 +11,6 @@ public enum ObjectiveType
 	KILL,      // Kill NPCs/monsters
 	USE,       // Use an item or object
 	SKILL,     // Skill training objective
+	BUY,       // Buy an item from a shop
 	OTHER      // General objective
 }

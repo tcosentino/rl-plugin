@@ -1,8 +1,10 @@
 package com.questnextaction;
 
 import com.google.inject.Provides;
+import com.questnextaction.db.ShopDatabase;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
@@ -17,6 +19,7 @@ import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,9 @@ public class ObjectiveTrackerPlugin extends Plugin
 	private ObjectiveManager objectiveManager;
 
 	@Inject
+	private ShopDatabase shopDatabase;
+
+	@Inject
 	private ObjectiveMinimapOverlay minimapOverlay;
 
 	@Inject
@@ -62,7 +68,7 @@ public class ObjectiveTrackerPlugin extends Plugin
 	private ObjectiveTrackerPanel panel;
 	private NavigationButton navigationButton;
 
-	private final Map<String, ObjectiveWorldMapPoint> worldMapPoints = new HashMap<>();
+	private final Map<String, List<ObjectiveWorldMapPoint>> worldMapPoints = new HashMap<>();
 	private BufferedImage mapIcon;
 
 	@Override
@@ -74,7 +80,7 @@ public class ObjectiveTrackerPlugin extends Plugin
 		mapIcon = createObjectiveIcon();
 
 		// Initialize panel
-		panel = new ObjectiveTrackerPanel(objectiveManager, config);
+		panel = new ObjectiveTrackerPanel(objectiveManager, config, shopDatabase);
 
 		// Create navigation button
 		navigationButton = NavigationButton.builder()
@@ -177,9 +183,12 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Remove points that are no longer active
 		worldMapPoints.entrySet().removeIf(entry -> {
 			Objective objective = objectiveManager.getObjective(entry.getKey());
-			if (objective == null || !objective.isActive() || objective.getLocation() == null)
+			if (objective == null || !objective.isActive())
 			{
-				worldMapPointManager.remove(entry.getValue());
+				for (ObjectiveWorldMapPoint point : entry.getValue())
+				{
+					worldMapPointManager.remove(point);
+				}
 				return true;
 			}
 			return false;
@@ -188,25 +197,55 @@ public class ObjectiveTrackerPlugin extends Plugin
 		// Add new active points
 		for (Objective objective : activeObjectives)
 		{
-			if (objective.getLocation() == null)
+			if (objective.getLocation() == null &&
+				(objective.getPossibleLocations() == null || objective.getPossibleLocations().isEmpty()))
 			{
 				continue;
 			}
 
 			if (!worldMapPoints.containsKey(objective.getId()))
 			{
-				ObjectiveWorldMapPoint point = new ObjectiveWorldMapPoint(objective, mapIcon);
-				worldMapPoints.put(objective.getId(), point);
-				worldMapPointManager.add(point);
+				List<ObjectiveWorldMapPoint> points = new ArrayList<>();
+
+				// For objectives with multiple possible locations, show all shops on the map
+				if (objective.getPossibleLocations() != null && !objective.getPossibleLocations().isEmpty())
+				{
+					for (WorldPoint location : objective.getPossibleLocations())
+					{
+						if (location != null)
+						{
+							ObjectiveWorldMapPoint point = new ObjectiveWorldMapPoint(
+								objective, location, mapIcon);
+							points.add(point);
+							worldMapPointManager.add(point);
+						}
+					}
+				}
+				else if (objective.getLocation() != null)
+				{
+					// Single location objective
+					ObjectiveWorldMapPoint point = new ObjectiveWorldMapPoint(
+						objective, objective.getLocation(), mapIcon);
+					points.add(point);
+					worldMapPointManager.add(point);
+				}
+
+				if (!points.isEmpty())
+				{
+					worldMapPoints.put(objective.getId(), points);
+				}
 			}
 		}
 	}
 
 	private void clearWorldMapPoints()
 	{
-		for (ObjectiveWorldMapPoint point : worldMapPoints.values())
+		for (List<ObjectiveWorldMapPoint> points : worldMapPoints.values())
 		{
-			worldMapPointManager.remove(point);
+			for (ObjectiveWorldMapPoint point : points)
+			{
+				worldMapPointManager.remove(point);
+			}
 		}
 		worldMapPoints.clear();
 	}

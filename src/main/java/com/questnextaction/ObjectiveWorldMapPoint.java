@@ -15,11 +15,13 @@ public class ObjectiveWorldMapPoint extends WorldMapPoint
 {
 	private final Objective objective;
 	private final BufferedImage mapIcon;
+	private final WorldPoint specificLocation;
 
-	public ObjectiveWorldMapPoint(Objective objective, BufferedImage mapIcon)
+	public ObjectiveWorldMapPoint(Objective objective, WorldPoint location, BufferedImage mapIcon)
 	{
-		super(objective.getLocation(), mapIcon);
+		super(location, mapIcon);
 		this.objective = objective;
+		this.specificLocation = location;
 		this.mapIcon = mapIcon;
 		this.setSnapToEdge(true);
 		this.setJumpOnClick(true);
@@ -44,7 +46,17 @@ public class ObjectiveWorldMapPoint extends WorldMapPoint
 		StringBuilder sb = new StringBuilder();
 		sb.append(objective.getTask());
 		sb.append("</br>");
-		sb.append(objective.getLocationName());
+
+		// For multi-location objectives, show which specific shop this marker represents
+		if (objective.getPossibleLocations() != null && objective.getPossibleLocations().size() > 1)
+		{
+			// Find which shop this location corresponds to by looking at shop database
+			sb.append("One of ").append(objective.getPossibleLocations().size()).append(" shops");
+		}
+		else
+		{
+			sb.append(objective.getLocationName());
+		}
 
 		return sb.toString();
 	}
