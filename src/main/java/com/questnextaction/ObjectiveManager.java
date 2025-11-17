@@ -75,6 +75,15 @@ public class ObjectiveManager
 				}
 			}
 
+			// Copy shop locations
+			if (existing.getShopLocations() != null)
+			{
+				for (ShopLocation shop : existing.getShopLocations())
+				{
+					builder.shopLocation(shop);
+				}
+			}
+
 			objectives.put(id, builder.build());
 		}
 	}

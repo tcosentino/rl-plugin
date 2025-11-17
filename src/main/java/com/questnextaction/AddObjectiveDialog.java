@@ -306,7 +306,7 @@ public class AddObjectiveDialog extends JDialog
 			.itemName(itemName)
 			.quantity(quantity);
 
-		// Add all shop locations as possible locations
+		// Add all shop locations as possible locations (for backward compatibility)
 		for (Shop shop : shops)
 		{
 			if (shop.getWorldPoint() != null)
@@ -315,11 +315,38 @@ public class AddObjectiveDialog extends JDialog
 			}
 		}
 
+		// Add detailed shop location data with pricing
+		for (Shop shop : shops)
+		{
+			if (shop.getWorldPoint() == null)
+			{
+				continue;
+			}
+
+			// Find the item in this shop to get price and stock
+			shop.getItems().stream()
+				.filter(item -> item.getName().equals(itemName))
+				.findFirst()
+				.ifPresent(shopItem -> {
+					ShopLocation shopLocation = ShopLocation.builder()
+						.shopId(shop.getId())
+						.shopName(shop.getName())
+						.ownerName(shop.getOwner())
+						.locationName(shop.getLocation())
+						.worldPoint(shop.getWorldPoint())
+						.price(shopItem.getPrice())
+						.stock(shopItem.getStock())
+						.build();
+
+					builder.shopLocation(shopLocation);
+				});
+		}
+
 		Objective objective = builder.build();
 		objectiveManager.addObjective(objective);
 
-		log.debug("Added new objective: {} at {} (with {} possible locations)",
-			task, locationName, shops.size());
+		log.debug("Added new objective: {} at {} (with {} shop locations)",
+			task, locationName, objective.getShopLocations() != null ? objective.getShopLocations().size() : 0);
 
 		// Refresh the panel
 		parentPanel.rebuild();

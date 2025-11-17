@@ -2,6 +2,7 @@ package com.questnextaction.testharness;
 
 import com.questnextaction.Objective;
 import com.questnextaction.ObjectiveManager;
+import com.questnextaction.ShopLocation;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.coords.WorldPoint;
 
@@ -261,6 +262,45 @@ public class ObjectiveDebugPanel extends JPanel {
                 WorldPoint loc = obj.getPossibleLocations().get(i);
                 sb.append(String.format("    [%d] (%d, %d, %d)\n",
                     i + 1, loc.getX(), loc.getY(), loc.getPlane()));
+            }
+        }
+
+        if (obj.getShopLocations() != null && !obj.getShopLocations().isEmpty()) {
+            sb.append(String.format("  Shop Details:     %d shop(s)\n",
+                obj.getShopLocations().size()));
+
+            for (int i = 0; i < obj.getShopLocations().size(); i++) {
+                ShopLocation shop = obj.getShopLocations().get(i);
+                sb.append(String.format("    [%d] %s\n", i + 1, shop.getShopName()));
+                sb.append(String.format("        Owner:    %s\n",
+                    shop.getOwnerName() != null ? shop.getOwnerName() : "N/A"));
+                sb.append(String.format("        Location: %s\n", shop.getLocationName()));
+                sb.append(String.format("        Price:    %d gp\n", shop.getPrice()));
+                sb.append(String.format("        Stock:    %s\n",
+                    shop.getStock() == -1 ? "Unlimited" : String.valueOf(shop.getStock())));
+                sb.append(String.format("        Coords:   (%d, %d, %d)\n",
+                    shop.getWorldPoint().getX(),
+                    shop.getWorldPoint().getY(),
+                    shop.getWorldPoint().getPlane()));
+
+                if (obj.getQuantity() != null) {
+                    int totalCost = shop.calculateTotalCost(obj.getQuantity());
+                    boolean sufficient = shop.hasSufficientStock(obj.getQuantity());
+                    sb.append(String.format("        Total:    %d gp (%s)\n",
+                        totalCost,
+                        sufficient ? "in stock" : "insufficient stock"));
+                }
+            }
+
+            // Show cheapest option
+            if (obj.getCheapestShop() != null) {
+                ShopLocation cheapest = obj.getCheapestShop();
+                sb.append(String.format("    Cheapest:     %s - %d gp",
+                    cheapest.getShopName(), cheapest.getPrice()));
+                if (obj.getQuantity() != null) {
+                    sb.append(String.format(" (Total: %d gp)", obj.getCheapestTotalCost()));
+                }
+                sb.append("\n");
             }
         }
 
